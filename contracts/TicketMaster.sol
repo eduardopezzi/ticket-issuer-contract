@@ -1,10 +1,10 @@
 pragma solidity 0.5.8;
 
 import "./ERC721.sol";
-import "./safe-math.sol";
-import "./supported-Interfaces.sol";
-import "./erc721-token-receiver.sol";
-import "./address-utils.sol";
+import "./utils/safe-math.sol";
+import "./utils/supported-Interfaces.sol";
+import "./utils/erc721-token-receiver.sol";
+import "./utils/address-utils.sol";
 
 contract TicketMaster is ERC721, SupportsInterface, ERC721TokenReceiver {
     using SafeMath for uint256;
@@ -121,6 +121,7 @@ contract TicketMaster is ERC721, SupportsInterface, ERC721TokenReceiver {
         uint256 _tokenId,
         bytes memory _data
     ) public payable canTransfer(_tokenId) validNFToken(_tokenId) {
+        address tokenOwner = idToOwner[_tokenId];
         _safeTransferFrom(_from, _to, _tokenId, "");
         require(
             _checkOnERC721Received(_from, _to, _tokenId, _data),
@@ -184,6 +185,20 @@ contract TicketMaster is ERC721, SupportsInterface, ERC721TokenReceiver {
         returns (bool)
     {
         return ownerToOperators[_owner][_operator];
+    }
+
+    //========= onERC721Received INTERFACE =======//
+
+    function onERC721Received(
+        address _operator,
+        address _from,
+        uint256 _tokenId,
+        bytes memory _data
+    ) public returns (bytes4) {
+        return
+            bytes4(
+                keccak256("onERC721Received(address,address,uint256,bytes)")
+            );
     }
 
     //========= CONTRACT FUNCTIONS =======//
@@ -261,7 +276,7 @@ contract TicketMaster is ERC721, SupportsInterface, ERC721TokenReceiver {
 
     function _transferFrom(address _from, address _to, uint256 _tokenId)
         public
-        payable 
+        payable
         canTransfer(_tokenId)
         validNFToken(_tokenId)
     {
